@@ -1,0 +1,28 @@
+# Development dependencies for the AI Agent Super-Skill.
+#
+# These cover every third-party import used by the code examples in SKILL.md so
+# that the documented patterns can actually be run and tested. Versions are
+# pinned to the set resolved and validated in the Cloud Agent environment.
+
+# Serving / web (agent_server.py, FastMCP template, RAG HTTP calls)
+fastapi==0.141.1
+uvicorn==0.52.4
+httpx==0.28.1
+
+# Data / evaluation (drift detection, RAG scoring)
+numpy==2.4.4
+scipy==1.18.0
+
+# Schemas / structured output
+pydantic==2.13.4
+
+# LLM provider SDKs and resilience helpers (provider abstraction layer)
+anthropic==1.0.0
+openai==3.3.1
+tenacity==9.1.4
+
+# MCP server development (Python FastMCP template)
+fastmcp==3.4.7
+
+# Testing
+pytest==9.1.1
