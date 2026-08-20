@@ -1,0 +1,12 @@
+---
+description: Conventions for editing this super-skill and nested Cursor skills
+globs: SKILL.md,README.md,AGENTS.md,.cursor/skills/**/*.md
+alwaysApply: false
+---
+
+- Treat root `SKILL.md` as the canonical reference; nested `.cursor/skills/*/SKILL.md` files are focused workflows.
+- Keep YAML frontmatter valid: quoted `version`, hyphenated `name`, description that states when to load the skill.
+- Nested skill folder name must match the `name` frontmatter field.
+- Prefer tables, checklists, and copy-pasteable config over prose.
+- Do not dump entire Cursor docs into SKILL.md; link to https://cursor.com/docs and keep local examples short.
+- When adding a capability, update the README table, the root TOC, the gap analysis table, and Appendix A.

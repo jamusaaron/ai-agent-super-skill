@@ -1,15 +1,15 @@
 ---
 name: ai-agent-super-skill
-description: Comprehensive AI agent building skill merging Perplexity Computer's skill creation, webserver, and automation capabilities with Claude Code's agent orchestration, MCP server building, RAG system construction, subagent coordination, parallel agent dispatching, prompt optimization, and execution planning. Covers designing AI agents, building MCP servers, creating RAG pipelines, orchestrating multi-agent systems, optimizing prompts, and deploying AI-powered workflows. Use when building AI agents, creating MCP servers, designing RAG systems, coordinating subagents, optimizing prompts, or architecting any AI-powered automation.
+description: Comprehensive AI agent building skill merging Perplexity Computer's skill creation, webserver, and automation capabilities with Claude Code's agent orchestration, MCP server building, RAG system construction, subagent coordination, parallel agent dispatching, prompt optimization, execution planning, and Cursor IDE settings, rules, skills, and MCP configuration. Covers designing AI agents, building MCP servers, creating RAG pipelines, orchestrating multi-agent systems, optimizing prompts, updating Cursor/VS Code settings.json, and deploying AI-powered workflows. Use when building AI agents, creating MCP servers, designing RAG systems, coordinating subagents, optimizing prompts, changing Cursor editor settings, or architecting any AI-powered automation.
 license: MIT
 metadata:
   author: get-zeked
-  version: '1.0'
+  version: '1.1'
 ---
 
 # AI Agent Builder Super-Skill
 
-A comprehensive reference for designing, building, and deploying AI agents — from single-tool bots to production multi-agent systems — merging best practices from Claude Code's agent orchestration patterns with Perplexity Computer's deployment infrastructure.
+A comprehensive reference for designing, building, and deploying AI agents — from single-tool bots to production multi-agent systems — merging best practices from Claude Code's agent orchestration patterns, Perplexity Computer's deployment infrastructure, and Cursor IDE settings, skills, rules, and MCP configuration.
 
 ---
 
@@ -27,6 +27,7 @@ A comprehensive reference for designing, building, and deploying AI agents — f
 10. [Backend Infrastructure for Agents](#10-backend-infrastructure-for-agents)
 11. [Agent Deployment & Monitoring](#11-agent-deployment--monitoring)
 12. [Unique Perplexity Computer Capabilities](#12-unique-perplexity-computer-capabilities)
+13. [Cursor IDE Settings & Agent Configuration](#13-cursor-ide-settings--agent-configuration)
 
 ---
 
@@ -50,6 +51,8 @@ This table maps each capability domain to its source skill, coverage level, and 
 | Deployment & observability | website-building (Perplexity) | UI deployment only | Agent health checks, trace logging |
 | Perplexity 400+ integrations | Perplexity Computer native | Available but undocumented | Integration mapping for agent use |
 | Scheduled monitoring | Perplexity Computer native | Not in any skill | Agent heartbeat and drift triggers |
+| Cursor/VS Code settings.json | update-cursor-settings (Cursor) | Not covered | User vs workspace workflow, key catalog, safety rules |
+| Cursor project agent config | Cursor docs (rules, skills, MCP, CLI) | Not covered | `.cursor/` layout, CLI config vs IDE settings |
 
 ---
 
@@ -2616,6 +2619,233 @@ No separate server provisioning needed.
 
 ---
 
+## 13. Cursor IDE Settings & Agent Configuration
+
+Use this section when an agent must change editor settings, install project-level Cursor config, or distinguish `settings.json` from CLI/MCP/rules files. The focused slash workflow lives at `.cursor/skills/update-cursor-settings/SKILL.md`.
+
+### 13.1 Settings file locations
+
+| Scope | Path | Applies to |
+|-------|------|------------|
+| User (macOS) | `~/Library/Application Support/Cursor/User/settings.json` | All local Cursor windows |
+| User (Linux) | `~/.config/Cursor/User/settings.json` | All local Cursor windows |
+| User (Windows) | `%APPDATA%\Cursor\User\settings.json` | All local Cursor windows |
+| Workspace | `.vscode/settings.json` | This repository only |
+
+Workspace settings override user settings for the same key. There is no separate `.cursor/settings.json` for general editor preferences — Cursor inherits VS Code's settings hierarchy.
+
+**Cloud / remote agents:** editing the user settings path on a VM does **not** change the operator's local IDE. Put shared defaults in `.vscode/settings.json` and commit them.
+
+### 13.2 Agent workflow for updating settings
+
+```
+1. Decide scope: user (personal) vs workspace (shared with the repo)
+2. Read the existing file — never replace the whole file with a single key
+3. Preserve unrelated keys and JSON-with-comments (// and /* */)
+4. Add or update only the requested setting
+5. Write 2-space indented JSON
+6. Report what changed and whether Reload Window is required
+```
+
+```python
+#!/usr/bin/env python3
+"""Minimal settings.json updater. Prefer preserving comments by editing
+the file in-place when the existing document uses // comments."""
+
+import json
+from pathlib import Path
+
+def update_settings(path: Path, updates: dict) -> dict:
+    if not path.exists():
+        data = {}
+    else:
+        raw = path.read_text(encoding="utf-8")
+        # Strip a BOM if present; this helper does not preserve comments.
+        data = json.loads(raw) if raw.strip() else {}
+        if not isinstance(data, dict):
+            raise ValueError(f"{path} is not a JSON object")
+    data.update(updates)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return data
+```
+
+If the file contains comments, **do not** round-trip it through `json.loads` unless you have already copied the original aside. Edit the requested keys in place.
+
+### 13.3 Common user requests → settings
+
+| User request | Setting | Example |
+|--------------|---------|---------|
+| bigger/smaller font | `editor.fontSize` | `16` |
+| change tab size | `editor.tabSize` | `2` |
+| format on save | `editor.formatOnSave` | `true` |
+| word wrap | `editor.wordWrap` | `"on"` |
+| change theme | `workbench.colorTheme` | `"Default Dark Modern"` |
+| hide minimap | `editor.minimap.enabled` | `false` |
+| auto save | `files.autoSave` | `"afterDelay"` |
+| line numbers | `editor.lineNumbers` | `"on"` |
+| agent chat text size | `cursor.composer.textSizeScale` | `1.2` |
+| agent text size enum | `cursor.agents.textSize` | `"large"` |
+| whole-UI zoom | `window.zoomLevel` | `1` |
+
+Language-specific overrides use `[languageId]` blocks:
+
+```json
+{
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  }
+}
+```
+
+### 13.4 Commit attribution (CLI vs IDE)
+
+These are **not** the same control:
+
+| Surface | Where to change it |
+|---------|--------------------|
+| Cursor CLI commits/PRs | `~/.cursor/cli-config.json` → `attribution.attributeCommitsToAgent` / `attribution.attributePRsToAgent` |
+| IDE Agent | **Cursor Settings > Agent > Attribution** (not `settings.json`) |
+
+Project CLI permission overrides belong in `.cursor/cli.json`. All other CLI fields stay global. Schema: https://cursor.com/docs/cli/reference/configuration.md
+
+### 13.5 Cursor project layout for agents
+
+```
+project/
+|-- .vscode/settings.json          # Shared editor defaults (commit these)
+|-- AGENTS.md                      # Simple always-on agent instructions
+|-- .cursor/
+|   |-- rules/*.mdc                # Project rules (frontmatter required)
+|   |-- skills/<name>/SKILL.md     # Agent skills / slash workflows
+|   |-- mcp.json                   # Project MCP servers
+|   |-- cli.json                   # CLI permission allow/deny only
+|   |-- hooks.json                 # Agent lifecycle hooks
+|   |-- sandbox.json               # Workspace sandbox policy
+|   `-- environment.json           # Cloud Agent environment
+`-- ~/.cursor/
+    |-- mcp.json                   # User MCP servers
+    `-- cli-config.json            # Global CLI config (pure JSON)
+```
+
+**Rules** (`.cursor/rules/*.mdc`):
+
+| Frontmatter | Behavior |
+|-------------|----------|
+| `alwaysApply: true` | Every chat |
+| `globs` set, `alwaysApply: false` | Auto-attach when matching files are in context |
+| `description` set, no globs | Agent decides from the description |
+| neither | Only when `@`-mentioned |
+
+Plain `.md` files in `.cursor/rules` are ignored. Use `.mdc` or fall back to `AGENTS.md`. Docs: https://cursor.com/docs/rules.md
+
+**Skills** (`.cursor/skills/<name>/SKILL.md`):
+
+- `name` must match the parent folder
+- `description` tells the agent when to load the skill
+- `disable-model-invocation: true` makes it slash-only (`/skill-name`)
+- Optional: `scripts/`, `references/`, `assets/`
+
+Docs: https://cursor.com/docs/skills.md
+
+**MCP** (`.cursor/mcp.json` or `~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+Interpolate with `${env:NAME}`, `${workspaceFolder}`, `${userHome}`. Never hardcode secrets. Docs: https://cursor.com/docs/mcp.md
+
+### 13.6 Recommended workspace defaults for skill/docs repos
+
+This repository ships `.vscode/settings.json` with:
+
+```json
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.wordWrap": "on",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "files.eol": "\n",
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  }
+}
+```
+
+For Python agent services, prefer a workspace overlay rather than changing the user's global tab size:
+
+```json
+{
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.chroma_db": true
+  }
+}
+```
+
+### 13.7 Settings vs neighboring config — decision tree
+
+```
+User asked to change something in Cursor
++-- Theme, font, wrap, format-on-save, minimap, agent text size
+|   -> settings.json (user unless they asked for repo-wide defaults)
++-- "Made with Cursor" commit/PR attribution
+|   +-- CLI agent -> ~/.cursor/cli-config.json
+|   +-- IDE agent -> Cursor Settings > Agent > Attribution
++-- Allow/deny shell or MCP in the CLI
+|   -> ~/.cursor/cli-config.json or .cursor/cli.json
++-- Persistent coding conventions for this repo
+|   -> .cursor/rules/*.mdc or AGENTS.md
++-- Reusable workflow ("when deploying, do X")
+|   -> .cursor/skills/<name>/SKILL.md
++-- External tools (GitHub, Slack, browser, DB)
+    -> .cursor/mcp.json
+```
+
+### 13.8 Checklist before shipping a settings change
+
+- [ ] Read the existing file first
+- [ ] Changed only the requested keys
+- [ ] JSON (or JSONC) still parses
+- [ ] No secrets written to disk
+- [ ] Correct file: user vs workspace vs `cli-config.json`
+- [ ] User told whether Reload Window is needed
+- [ ] Cloud agents committed workspace settings instead of editing the VM user profile
+
+### 13.9 Common mistakes
+
+| Mistake | Why it fails | Fix |
+|---------|--------------|-----|
+| Overwriting `settings.json` with a single key | Drops the user's theme, formatters, and keybindings | Merge into the existing object |
+| Editing user settings on a Cloud Agent VM | Does not reach the operator's laptop | Commit `.vscode/settings.json` |
+| Putting CLI attribution in `settings.json` | IDE ignores those keys | Use `cli-config.json` or the Attribution UI |
+| Storing MCP tokens in committed `mcp.json` | Secrets leak | `${env:NAME}` plus a local `.env` (not committed) |
+| Saving a rule as `.md` under `.cursor/rules` | Cursor ignores it | Use `.mdc` with frontmatter, or `AGENTS.md` |
+| Skill `name` ≠ folder name | Skill may not load | Match `name` to the parent directory |
+
+---
+
 ## Appendix A: Quick Reference — When to Use Which Pattern
 
 | Situation | Use This |
@@ -2633,6 +2863,8 @@ No separate server provisioning needed.
 | Need agents to communicate with each other | §10.3 Agent Message Bus |
 | Deploying an agent to production | §11 Agent Deployment & Monitoring |
 | Using Perplexity Computer for agent automation | §12 Unique Perplexity Computer Capabilities |
+| Need to change Cursor/VS Code editor settings | §13.2 Agent workflow + `.cursor/skills/update-cursor-settings` |
+| Need Cursor rules, skills, MCP, or CLI config | §13.5 Cursor project layout for agents |
 
 ---
 
@@ -2662,6 +2894,11 @@ No separate server provisioning needed.
 **Context:** How should agents persist state in Perplexity Computer?
 **Decision:** SQLite via CGI-bin for development; PostgreSQL/Redis for production.
 **Rationale:** CGI-bin SQLite requires zero infrastructure, deploys with the frontend. Swap to PostgreSQL when multi-instance or high-traffic.
+
+### ADR-006: Cursor Settings Scope
+**Context:** An agent is asked to change a Cursor/VS Code setting.
+**Decision:** Personal editor prefs go in user `settings.json`. Shared project defaults go in `.vscode/settings.json`. CLI attribution/permissions never go in `settings.json`.
+**Rationale:** Workspace settings are version-controlled and reach every contributor, including Cloud Agents. User settings on a remote VM never update the operator's local IDE. CLI and IDE attribution are separate surfaces.
 
 ---
 
