@@ -1,0 +1,11 @@
+{
+  "name": "AI Agent Super-Skill",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "agent-server",
+      "command": "python3 -m uvicorn agent_server:app --app-dir examples --host 0.0.0.0 --port 8080"
+    }
+  ],
+  "ports": [8080]
+}
