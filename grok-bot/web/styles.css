@@ -1,0 +1,441 @@
+/* GROK BOT — "The Wire". Teletype newsroom: paper, ink, one vermilion accent. */
+
+:root {
+  --paper: #f3edde;
+  --paper-deep: #eae2cd;
+  --ink: #1c160e;
+  --ink-soft: #57503f;
+  --ink-faint: #8b8370;
+  --vermilion: #cc3512;
+  --vermilion-deep: #a52708;
+  --hairline: rgba(28, 22, 14, 0.28);
+  --hairline-soft: rgba(28, 22, 14, 0.14);
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--serif);
+  color: var(--ink);
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 252, 240, 0.9), rgba(255, 252, 240, 0) 60%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(28, 22, 14, 0.012) 3px 4px),
+    linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+  background-attachment: fixed;
+}
+
+/* faint photographic grain over everything */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.paper {
+  max-width: 1180px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------------- masthead */
+
+.masthead { padding-top: 28px; animation: settle 0.7s ease both; }
+
+.masthead-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  padding: 6px 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.stamp { white-space: nowrap; }
+
+.wordmark {
+  margin: 18px 0 2px;
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(52px, 9vw, 104px);
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  font-variation-settings: "opsz" 72;
+  animation: rise 0.8s cubic-bezier(0.2, 0.9, 0.2, 1) 0.1s both;
+}
+
+.wordmark .star {
+  color: var(--vermilion);
+  font-size: 0.55em;
+  vertical-align: 0.22em;
+  padding: 0 0.06em;
+  display: inline-block;
+  animation: spin-in 1s cubic-bezier(0.2, 0.9, 0.3, 1.4) 0.35s both;
+}
+
+.tagline {
+  margin: 6px 0 14px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  animation: settle 0.7s ease 0.3s both;
+}
+
+.rule-double {
+  height: 7px;
+  border-top: 3px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  transform-origin: left center;
+  animation: draw 0.9s cubic-bezier(0.6, 0, 0.2, 1) 0.25s both;
+}
+
+/* ------------------------------------------------- bulletin */
+
+.bulletin {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--vermilion);
+  border-left: 6px solid var(--vermilion);
+  color: var(--vermilion-deep);
+  background: rgba(204, 53, 18, 0.06);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  animation: settle 0.35s ease both;
+}
+
+.bulletin-label {
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.bulletin button {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ------------------------------------------------- deck layout */
+
+.deck {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: clamp(18px, 3vw, 40px);
+  padding: 22px 0 30px;
+  min-height: 0;
+  animation: settle 0.7s ease 0.45s both;
+}
+
+/* left rail */
+
+.rail {
+  border-right: 1px solid var(--hairline-soft);
+  padding-right: clamp(12px, 2vw, 26px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+
+.rail-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+.wire-btn {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--ink);
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.wire-btn:hover { background: var(--ink); color: var(--paper); }
+.wire-btn:active { transform: translateY(1px); }
+.wire-btn:disabled { opacity: 0.4; cursor: default; }
+.wire-btn:disabled:hover { background: none; color: var(--ink); }
+
+.session-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.session-item {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px dotted var(--hairline-soft);
+}
+
+.session-open {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 10px 6px 10px 2px;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+}
+
+.s-title {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.s-meta {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.session-item.active .s-title { color: var(--vermilion-deep); font-weight: 700; }
+.session-item.active .s-title::before { content: "▸ "; color: var(--vermilion); }
+
+.session-del {
+  border: 0;
+  background: none;
+  color: var(--ink-faint);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.session-item:hover .session-del { opacity: 1; }
+.session-del:hover { color: var(--vermilion); }
+
+.rail-foot {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--hairline-soft);
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ------------------------------------------------- transcript */
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.transcript {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 2px 18px;
+  scroll-behavior: smooth;
+}
+
+.quiet {
+  text-align: center;
+  padding: 12vh 20px 0;
+  color: var(--ink-soft);
+}
+
+.quiet-star {
+  display: block;
+  font-size: 44px;
+  color: var(--vermilion);
+  animation: spin-in 1.1s cubic-bezier(0.2, 0.9, 0.3, 1.35) 0.6s both;
+}
+
+.quiet-title {
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 600;
+  margin: 14px 0 6px;
+}
+
+.quiet-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.8;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+.msg { margin: 22px 0; animation: rise 0.35s ease both; }
+
+.msg-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+
+.msg.user .msg-meta { color: var(--vermilion-deep); }
+
+.msg.user .msg-body {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.65;
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--vermilion);
+  background: rgba(28, 22, 14, 0.035);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg.grok .msg-body {
+  font-size: 17.5px;
+  line-height: 1.62;
+  max-width: 68ch;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg.grok + .msg.user {
+  border-top: 1px solid var(--hairline-soft);
+  padding-top: 20px;
+}
+
+.caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  vertical-align: -0.16em;
+  margin-left: 2px;
+  background: var(--vermilion);
+  animation: blink 0.85s steps(1) infinite;
+}
+
+/* ------------------------------------------------- composer */
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  border-top: 3px double var(--ink);
+  padding-top: 14px;
+}
+
+.prompt-mark {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--vermilion);
+  padding-bottom: 9px;
+}
+
+.composer textarea {
+  flex: 1;
+  resize: none;
+  border: 0;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  padding: 8px 0;
+  max-height: 180px;
+  outline: none;
+}
+
+.composer textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+.wire-btn.send {
+  border-width: 2px;
+  padding: 9px 18px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.wire-btn.send:hover { background: var(--vermilion); border-color: var(--vermilion); color: #fff; }
+.wire-btn.send:disabled { background: var(--ink); color: var(--paper); }
+
+/* ------------------------------------------------- animation + small screens */
+
+@keyframes settle { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@keyframes spin-in {
+  from { opacity: 0; transform: rotate(-200deg) scale(0.4); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+@media (max-width: 760px) {
+  .deck { grid-template-columns: 1fr; }
+  .rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline-soft);
+    padding: 0 0 14px;
+    max-height: 200px;
+  }
+  .masthead-top { font-size: 9.5px; }
+}

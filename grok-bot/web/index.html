@@ -1,5 +1,63 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Grok Bot</title></head>
-<body>Grok Bot — UI coming in the next commit.</body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GROK BOT — The Wire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..800;1,6..72,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="paper">
+    <header class="masthead">
+      <div class="masthead-top">
+        <span class="stamp">VOL. I · NO. 1</span>
+        <span class="dateline" id="dateline">—</span>
+        <span class="stamp" id="model-stamp">MODEL: —</span>
+      </div>
+      <h1 class="wordmark">GROK<span class="star">✶</span>BOT</h1>
+      <p class="tagline">the wire · maximally helpful · dispatches filed around the clock</p>
+      <div class="rule-double" aria-hidden="true"></div>
+    </header>
+
+    <div class="bulletin" id="bulletin" hidden>
+      <span class="bulletin-label">service bulletin</span>
+      <span id="bulletin-text"></span>
+      <button id="bulletin-dismiss" aria-label="Dismiss">×</button>
+    </div>
+
+    <main class="deck">
+      <aside class="rail">
+        <div class="rail-head">
+          <h2>Dispatches</h2>
+          <button id="new-session" class="wire-btn" type="button">+ new</button>
+        </div>
+        <ul id="session-list" class="session-list"></ul>
+        <p class="rail-foot">sessions live in memory —<br>a restart clears the wire.</p>
+      </aside>
+
+      <section class="column">
+        <div id="transcript" class="transcript" aria-live="polite">
+          <div class="quiet" id="quiet">
+            <span class="quiet-star" aria-hidden="true">✶</span>
+            <p class="quiet-title">The wire is quiet.</p>
+            <p class="quiet-sub">File a dispatch below. Grok answers in kind —<br>witty, direct, occasionally cosmic.</p>
+          </div>
+        </div>
+
+        <form id="composer" class="composer" autocomplete="off">
+          <span class="prompt-mark" aria-hidden="true">&gt;</span>
+          <textarea id="input" rows="1" placeholder="File your dispatch…" spellcheck="false"></textarea>
+          <button type="submit" id="send" class="wire-btn send">transmit</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
 </html>

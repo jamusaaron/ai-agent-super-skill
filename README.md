@@ -1,5 +1,9 @@
 # AI Agent Builder Super-Skill
 
+> **New:** this repo now ships [Grok Bot](grok-bot/README.md) — a chat bot
+> powered by xAI's Grok API with a streaming web UI ("The Wire"). See
+> `grok-bot/README.md` for setup and usage.
+
 Comprehensive AI agent building skill merging **Perplexity Computer's skill creation and automation** with **Claude Code's agent orchestration, MCP servers, RAG, subagent coordination, and prompt optimization**.
 
 ## What's Inside
