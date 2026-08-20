@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Grok Bot — observatory console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,400;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;0,9..144,700;1,9..144,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="app">
+      <aside class="spine">
+        <p class="spine__mark">xAI</p>
+        <h1 class="spine__title">Grok<br />Bot</h1>
+        <p class="spine__tag">maximally helpful,<br />mildly feral</p>
+        <div class="spine__meter" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </aside>
+
+      <section class="rail" aria-label="Threads">
+        <header class="rail__head">
+          <span class="kicker">threads</span>
+          <button type="button" class="ghost" id="new-thread">new</button>
+        </header>
+        <ul class="threads" id="threads"></ul>
+      </section>
+
+      <main class="stage">
+        <header class="mast">
+          <div>
+            <p class="kicker" id="status-line">awaiting signal</p>
+            <h2 id="thread-title">New thread</h2>
+          </div>
+          <dl class="meta">
+            <div>
+              <dt>model</dt>
+              <dd id="model-name">—</dd>
+            </div>
+            <div>
+              <dt>key</dt>
+              <dd id="key-state">—</dd>
+            </div>
+          </dl>
+        </header>
+
+        <div class="banner" id="banner" hidden></div>
+
+        <ol class="log" id="log" aria-live="polite"></ol>
+
+        <form class="composer" id="composer">
+          <label class="sr-only" for="prompt">Message Grok</label>
+          <span class="prompt-sig" aria-hidden="true">›</span>
+          <textarea
+            id="prompt"
+            name="prompt"
+            rows="1"
+            placeholder="ask grok anything — enter sends, shift+enter breaks"
+            required
+          ></textarea>
+          <button type="submit" id="send">transmit</button>
+        </form>
+      </main>
+    </div>
+    <script src="/assets/app.js"></script>
+  </body>
+</html>
