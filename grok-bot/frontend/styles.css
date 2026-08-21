@@ -167,8 +167,21 @@ body {
   flex: 1;
 }
 
-.threads li button {
-  width: 100%;
+.thread {
+  display: flex;
+  align-items: stretch;
+  border-left: 2px solid transparent;
+}
+
+.thread:hover,
+.thread.is-active {
+  background: rgba(214, 255, 63, 0.06);
+  border-left-color: var(--signal);
+}
+
+.thread__open {
+  flex: 1;
+  min-width: 0;
   text-align: left;
   background: transparent;
   border: 0;
@@ -176,13 +189,34 @@ body {
   font: inherit;
   padding: 12px 10px;
   cursor: pointer;
-  border-left: 2px solid transparent;
 }
 
-.threads li button:hover,
-.threads li.is-active button {
-  background: rgba(214, 255, 63, 0.06);
-  border-left-color: var(--signal);
+.thread__del {
+  border: 0;
+  background: transparent;
+  color: var(--paper-dim);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 0 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.thread:hover .thread__del,
+.thread__del.is-armed {
+  opacity: 1;
+}
+
+.thread__del:hover {
+  color: var(--danger);
+}
+
+.thread__del.is-armed {
+  color: var(--danger);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .threads .title {
@@ -202,6 +236,7 @@ body {
 }
 
 .stage {
+  position: relative;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   min-width: 0;
@@ -273,16 +308,160 @@ body {
   color: var(--signal);
 }
 
+.msg__content {
+  min-width: 0;
+}
+
 .msg__body {
   margin: 0;
   font-family: var(--display);
   font-size: 20px;
   line-height: 1.45;
+}
+
+.msg--you .msg__body {
+  font-style: italic;
   white-space: pre-wrap;
 }
 
-.msg--user .msg__body {
+.msg__body > p,
+.msg__body > ul,
+.msg__body > ol,
+.msg__body > blockquote {
+  margin: 0 0 0.7em;
+}
+
+.msg__body > :last-child {
+  margin-bottom: 0;
+}
+
+.msg__body ul,
+.msg__body ol {
+  padding-left: 1.4em;
+}
+
+.msg__body li {
+  margin: 0.25em 0;
+}
+
+.msg__body h3,
+.msg__body h4,
+.msg__body h5,
+.msg__body h6 {
+  margin: 1em 0 0.4em;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.msg__body > h3:first-child,
+.msg__body > h4:first-child {
+  margin-top: 0;
+}
+
+.msg__body h3 {
+  font-size: 26px;
+}
+
+.msg__body h4 {
+  font-size: 22px;
+}
+
+.msg__body h5,
+.msg__body h6 {
+  font-size: 19px;
+}
+
+.msg__body blockquote {
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid var(--copper);
+  color: var(--paper-dim);
   font-style: italic;
+}
+
+.msg__body a {
+  color: var(--signal);
+  text-decoration-color: rgba(214, 255, 63, 0.4);
+  text-underline-offset: 3px;
+}
+
+.msg__body code.inline {
+  font-family: var(--mono);
+  font-size: 0.75em;
+  background: rgba(243, 234, 216, 0.08);
+  border: 1px solid var(--line);
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.codeblock {
+  margin: 0.8em 0;
+  border: 1px solid var(--line);
+  background: var(--ink);
+  font-family: var(--mono);
+}
+
+.codeblock__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(243, 234, 216, 0.04);
+}
+
+.codeblock__lang {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--copper-hot);
+}
+
+.codeblock__copy,
+.mini {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--paper-dim);
+  padding: 3px 9px;
+  cursor: pointer;
+}
+
+.codeblock__copy:hover,
+.mini:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+.codeblock__pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.codeblock__pre code {
+  font-family: var(--mono);
+  color: var(--paper);
+}
+
+.msg__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.msg:hover .msg__actions,
+.msg:focus-within .msg__actions {
+  opacity: 1;
 }
 
 .cursor {
@@ -296,7 +475,7 @@ body {
 }
 
 .empty {
-  max-width: 28rem;
+  max-width: 34rem;
   padding: 48px 8px;
   color: var(--paper-dim);
 }
@@ -306,6 +485,116 @@ body {
   font-family: var(--display);
   font-size: 32px;
   color: var(--paper);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: left;
+  color: var(--paper);
+  background: rgba(243, 234, 216, 0.04);
+  border: 1px solid var(--line);
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.chip:hover {
+  border-color: var(--signal);
+  background: rgba(214, 255, 63, 0.07);
+}
+
+.thinking {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.thinking i {
+  width: 7px;
+  height: 7px;
+  background: var(--signal);
+  border-radius: 50%;
+  animation: think 1.2s ease-in-out infinite;
+}
+
+.thinking i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.thinking i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes think {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+.scroll-pill {
+  position: absolute;
+  left: 50%;
+  bottom: 118px;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--void);
+  background: var(--signal);
+  border: 0;
+  padding: 8px 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.scroll-pill:hover {
+  background: var(--copper-hot);
+}
+
+.rename {
+  font-family: var(--display);
+  font-weight: 560;
+  font-size: clamp(28px, 4vw, 48px);
+  letter-spacing: -0.03em;
+  color: var(--paper);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--copper);
+  outline: none;
+  width: 100%;
+  padding: 0;
+}
+
+#thread-title {
+  cursor: text;
+}
+
+#send.is-stop {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+#send.is-stop:hover {
+  background: var(--danger);
+  color: var(--void);
+  border-color: var(--danger);
 }
 
 .composer {
@@ -374,8 +663,13 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .spine__meter span,
-  .cursor {
+  .cursor,
+  .thinking i {
     animation: none;
+  }
+
+  .thinking i {
+    opacity: 0.7;
   }
 }
 

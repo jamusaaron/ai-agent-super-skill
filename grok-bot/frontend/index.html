@@ -36,7 +36,7 @@
         <header class="mast">
           <div>
             <p class="kicker" id="status-line">awaiting signal</p>
-            <h2 id="thread-title">New thread</h2>
+            <h2 id="thread-title" title="click to rename">New thread</h2>
           </div>
           <dl class="meta">
             <div>
@@ -47,12 +47,24 @@
               <dt>key</dt>
               <dd id="key-state">—</dd>
             </div>
+            <div>
+              <dt>store</dt>
+              <dd id="store-kind">—</dd>
+            </div>
+            <div>
+              <dt>log</dt>
+              <dd id="msg-count">0</dd>
+            </div>
           </dl>
         </header>
 
         <div class="banner" id="banner" hidden></div>
 
         <ol class="log" id="log" aria-live="polite"></ol>
+
+        <button type="button" class="scroll-pill" id="scroll-pill" hidden>
+          ▼ latest
+        </button>
 
         <form class="composer" id="composer">
           <label class="sr-only" for="prompt">Message Grok</label>
