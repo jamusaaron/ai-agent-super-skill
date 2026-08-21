@@ -1,0 +1,2 @@
+source_id,name,type,location,owner,access,connected,approved_by,date_added,notes
+SRC-001,Cabinet shared workspace,internal repository,ai-cabinet/ in this git repository,Folio,read-write,yes,DEC-001,2026-08-21,The Cabinet's own registers; the only connected source. No external accounts connected per DEC-004.
