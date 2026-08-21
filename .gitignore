@@ -4,6 +4,7 @@ __pycache__/
 venv/
 .env
 *.pyc
+grok-bot/data/
 .coverage
 htmlcov/
 .DS_Store

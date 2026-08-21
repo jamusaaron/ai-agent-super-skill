@@ -6,8 +6,8 @@ from fastapi.testclient import TestClient
 import pytest
 
 from app.errors import GrokAPIError, GrokAuthError, GrokConfigError, GrokRateLimitError
-from app.main import create_app
-from app.sessions import Message, SessionStore
+from app.main import create_app, stream_events
+from app.sessions import Message, SessionStore, SQLiteSessionStore
 
 
 class FakeGrok:
@@ -175,3 +175,123 @@ def test_ui_is_served(client: TestClient):
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
+
+
+def test_health_reports_memory_store(client: TestClient):
+    assert client.get("/health").json()["store"] == "memory"
+
+
+def test_health_reports_sqlite_store(tmp_path, grok: FakeGrok):
+    app = create_app(
+        store=SQLiteSessionStore(tmp_path / "api.db"),
+        grok=grok,
+        settings_overrides={"xai_api_key": "test-key"},
+    )
+    assert TestClient(app).get("/health").json()["store"] == "sqlite"
+
+
+def test_rename_session(client: TestClient):
+    session_id = client.post("/api/sessions").json()["id"]
+    response = client.patch(f"/api/sessions/{session_id}", json={"title": "  Slick new name  "})
+    assert response.status_code == 200
+    assert response.json()["title"] == "Slick new name"
+    assert client.get(f"/api/sessions/{session_id}").json()["title"] == "Slick new name"
+
+
+def test_rename_unknown_session_is_404(client: TestClient):
+    response = client.patch("/api/sessions/missing", json={"title": "anything"})
+    assert response.status_code == 404
+
+
+def test_rename_blank_title_is_422(client: TestClient):
+    session_id = client.post("/api/sessions").json()["id"]
+    response = client.patch(f"/api/sessions/{session_id}", json={"title": "   "})
+    assert response.status_code == 422
+
+
+def test_retry_replaces_last_assistant_reply(client: TestClient, grok: FakeGrok, store: SessionStore):
+    grok.replies = ["first answer", "second answer"]
+    session_id = client.post("/api/sessions").json()["id"]
+    client.post("/api/chat", json={"session_id": session_id, "message": "question"})
+
+    with client.stream("POST", "/api/chat/retry", json={"session_id": session_id}) as response:
+        assert response.status_code == 200
+        assert "text/event-stream" in response.headers["content-type"]
+        body = "".join(response.iter_text())
+    assert "[DONE]" in body
+
+    history = client.get(f"/api/sessions/{session_id}").json()["messages"]
+    assert [m["role"] for m in history] == ["user", "assistant"]
+    assert history[-1]["content"] == "second answer"
+    # The retried call must not include the dropped reply in its prompt history.
+    assert [m.content for m in grok.calls[-1]] == ["question"]
+
+
+def test_retry_unknown_session_is_404(client: TestClient):
+    response = client.post("/api/chat/retry", json={"session_id": "nope"})
+    assert response.status_code == 404
+
+
+def test_retry_with_no_user_message_is_409(client: TestClient):
+    session_id = client.post("/api/sessions").json()["id"]
+    response = client.post("/api/chat/retry", json={"session_id": session_id})
+    assert response.status_code == 409
+
+
+class DrippingGrok:
+    """Streams a fixed list of tokens; used to observe partial consumption."""
+
+    def __init__(self, tokens: list[str], error_after: int | None = None) -> None:
+        self.tokens = tokens
+        self.error_after = error_after
+
+    def stream(self, history: list[Message]) -> Iterator[str]:
+        for index, token in enumerate(self.tokens):
+            if self.error_after is not None and index == self.error_after:
+                raise GrokAPIError()
+            yield token
+
+
+def test_client_disconnect_persists_partial_reply(store: SessionStore):
+    session = store.create()
+    store.append(session.id, "user", "stream me something long")
+    history = list(store.get(session.id).messages)
+    grok = DrippingGrok(["alpha ", "beta ", "gamma"])
+
+    events = stream_events(store, grok, session.id, history)
+    assert "alpha" in next(events)
+    assert "beta" in next(events)
+    events.close()  # simulates the client disconnecting mid-stream
+
+    messages = store.get(session.id).messages
+    assert messages[-1].role == "assistant"
+    assert messages[-1].content == "alpha beta "
+
+
+def test_mid_stream_error_persists_partial_and_reports(store: SessionStore):
+    session = store.create()
+    store.append(session.id, "user", "go")
+    history = list(store.get(session.id).messages)
+    grok = DrippingGrok(["partial ", "never-sent"], error_after=1)
+
+    frames = list(stream_events(store, grok, session.id, history))
+    assert any("partial" in frame for frame in frames)
+    assert any("error" in frame for frame in frames)
+
+    messages = store.get(session.id).messages
+    assert messages[-1].role == "assistant"
+    assert messages[-1].content == "partial "
+
+
+def test_completed_stream_persists_reply_exactly_once(store: SessionStore):
+    session = store.create()
+    store.append(session.id, "user", "hi")
+    history = list(store.get(session.id).messages)
+    grok = DrippingGrok(["Hel", "lo"])
+
+    frames = list(stream_events(store, grok, session.id, history))
+    assert frames[-1] == "data: [DONE]\n\n"
+
+    messages = store.get(session.id).messages
+    assert [m.role for m in messages] == ["user", "assistant"]
+    assert messages[-1].content == "Hello"

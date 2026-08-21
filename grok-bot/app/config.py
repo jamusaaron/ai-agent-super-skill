@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     xai_api_key: str = ""
     grok_model: str = "grok-4.6"
     xai_base_url: str = "https://api.x.ai/v1"
+    grokbot_db: str = ""
     host: str = "0.0.0.0"
     port: int = 8000
 
